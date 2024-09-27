@@ -20,7 +20,7 @@ type data struct {
 }
 
 // Function to execute the ping command and return the output
-func pingURL(url string) (string, error) {
+func PingURL(url string) (string, error) {
 	cmd := exec.Command("ping", "-c", "5", url)
 	output, err := cmd.Output()
 	if err != nil {
@@ -37,7 +37,7 @@ func main() {
 	url = url[:len(url)-1] // Remove the newline character
 
 	// Call the pingURL function
-	result, err := pingURL(url)
+	result, err := PingURL(url)
 	if err != nil {
 		fmt.Println("Error executing command:", err)
 		return
