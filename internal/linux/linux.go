@@ -1,9 +1,6 @@
-package main
+package linux
 
 import (
-	"bufio"
-	"fmt"
-	"os"
 	"os/exec"
 )
 
@@ -29,21 +26,21 @@ func PingURL(url string) (string, error) {
 	return string(output), nil
 }
 
-func main() {
-	// Prompt the user for input
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter the website/URL to ping: ")
-	url, _ := reader.ReadString('\n')
-	url = url[:len(url)-1] // Remove the newline character
+// func main() {
+// 	// Prompt the user for input
+// 	reader := bufio.NewReader(os.Stdin)
+// 	fmt.Print("Enter the website/URL to ping: ")
+// 	url, _ := reader.ReadString('\n')
+// 	url = url[:len(url)-1] // Remove the newline character
 
-	// Call the pingURL function
-	result, err := PingURL(url)
-	if err != nil {
-		fmt.Println("Error executing command:", err)
-		return
-	}
+// 	// Call the pingURL function
+// 	result, err := PingURL(url)
+// 	if err != nil {
+// 		fmt.Println("Error executing command:", err)
+// 		return
+// 	}
 
-	// Print the output
-	fmt.Println("Command Output:")
-	fmt.Println(result)
-}
+// 	// Print the output
+// 	fmt.Println("Command Output:")
+// 	fmt.Println(result)
+// }
