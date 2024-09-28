@@ -2,58 +2,73 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"net/http"
 	"network-checker/internal/linux"
 	"network-checker/internal/windows"
 	"runtime"
 )
 
 type data struct {
-	hostIP     string
-	hostMAC    string
-	ip         string
-	minTime    string
-	avgTime    string
-	maxTime    string
-	packetLoss string
-	err        error
+	HostIP     string
+	HostMAC    string
+	PingIP     string
+	MinTime    string
+	AvgTime    string
+	MaxTime    string
+	PacketLoss string
 }
 
 func main() {
+	// Set up the router
+	http.HandleFunc("/", networkInfoHandler)
+	fmt.Println("Server started at :8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+func networkInfoHandler(w http.ResponseWriter, r *http.Request) {
 	os := runtime.GOOS
-
-	fmt.Println("OS:", os)
-
 	var output data
 
 	if os == "linux" {
-		fmt.Println("Using Linux based script")
-		output.hostIP, output.hostMAC, output.err = linux.GetHostIPAndMAC()
-
-		if output.err != nil {
-			fmt.Println("Error: ", output.err)
-		}
-		output.ip, output.minTime, output.avgTime, output.maxTime, output.packetLoss, output.err = linux.ExtractPingStats("google.com")
-		if output.err != nil {
-			fmt.Println("Error: ", output.err)
-			return
-		}
-
-		//Statements to check stuff is getting recieved
-		fmt.Printf("Host IP: %s\nHost MAC: %s\n", output.hostIP, output.hostMAC)
-		fmt.Printf("IP: %s\nMin Time: %s\nAvg Time: %s\n", output.ip, output.minTime, output.avgTime)
-
+		output.HostIP, output.HostMAC, output.PingIP, output.MinTime, output.AvgTime, output.MaxTime, output.PacketLoss = getLinuxNetworkInfo()
+	} else if os == "windows" {
+		output.HostIP, output.HostMAC, output.PingIP, output.MinTime, output.AvgTime, output.MaxTime, output.PacketLoss = getWindowsNetworkInfo()
 	}
 
-	if os == "windows" {
-		fmt.Println("Using Windows based script")
-		output.hostIP, output.hostMAC, output.err = windows.GetHostIPAndMAC()
-		if output.err != nil {
-			fmt.Println("Error: ", output.err)
-		}
-
-		output.ip, output.minTime, output.avgTime, output.maxTime, output.packetLoss, output.err = windows.ExtractPingStats("google.com")
-		fmt.Printf("Host IP: %s\nHost MAC: %s\n", output.hostIP, output.hostMAC)
-		fmt.Printf("IP: %s\nMin Time: %s\nAvg Time: %s\n", output.ip, output.minTime, output.avgTime)
+	// Parse and execute the template
+	tmpl, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+	tmpl.Execute(w, output)
+}
 
+func getLinuxNetworkInfo() (string, string, string, string, string, string, string) {
+	hostIP, hostMAC, err := linux.GetHostIPAndMAC()
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+	ip, minTime, avgTime, maxTime, packetLoss, err := linux.ExtractPingStats("google.com")
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+	// Convert packet loss to percentage
+	packetLossPercentage := packetLoss + " %"
+	return hostIP, hostMAC, ip, minTime, avgTime, maxTime, packetLossPercentage
+}
+
+func getWindowsNetworkInfo() (string, string, string, string, string, string, string) {
+	hostIP, hostMAC, err := windows.GetHostIPAndMAC()
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+	ip, minTime, avgTime, maxTime, packetLoss, err := windows.ExtractPingStats("google.com")
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+	// Convert packet loss to percentage
+	packetLossPercentage := packetLoss + " %"
+	return hostIP, hostMAC, ip, minTime, avgTime, maxTime, packetLossPercentage
 }
