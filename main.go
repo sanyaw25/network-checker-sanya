@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"network-checker/internal/linux"
+	"network-checker/internal/windows"
 	"runtime"
 )
 
@@ -41,6 +42,18 @@ func main() {
 		fmt.Printf("Host IP: %s\nHost MAC: %s\n", output.hostIP, output.hostMAC)
 		fmt.Printf("IP: %s\nMin Time: %s\nAvg Time: %s\n", output.ip, output.minTime, output.avgTime)
 
+	}
+
+	if os == "windows" {
+		fmt.Println("Using Windows based script")
+		output.hostIP, output.hostMAC, output.err = windows.GetHostIPAndMAC()
+		if output.err != nil {
+			fmt.Println("Error: ", output.err)
+		}
+
+		output.ip, output.minTime, output.avgTime, output.maxTime, output.packetLoss, output.err = windows.ExtractPingStats("google.com")
+		fmt.Printf("Host IP: %s\nHost MAC: %s\n", output.hostIP, output.hostMAC)
+		fmt.Printf("IP: %s\nMin Time: %s\nAvg Time: %s\n", output.ip, output.minTime, output.avgTime)
 	}
 
 }

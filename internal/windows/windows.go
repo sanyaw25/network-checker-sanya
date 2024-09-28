@@ -1,4 +1,4 @@
-package main
+package windows
 
 import (
 	"fmt"
@@ -87,27 +87,28 @@ func ExtractPingStats(url string) (string, string, string, string, string, error
 }
 
 // main function to test the functionalities
-func main() {
-	ip, mac, err := GetHostIPAndMAC()
-	if err != nil {
-		fmt.Println("Error getting IP and MAC:", err)
-		return
-	}
-	fmt.Println("IP Address:", ip)
-	fmt.Println("MAC Address:", mac)
-
-	// Change the URL to a valid address for pinging
-	url := "google.com" // Example URL
-	ipAddress, minTime, avgTime, maxTime, packetLoss, err := ExtractPingStats(url)
-	if err != nil {
-		fmt.Println("Error extracting ping stats:", err)
-		return
-	}
-
-	fmt.Printf("Ping Statistics for %s:\n", url)
-	fmt.Printf("IP Address: %s\n", ipAddress)
-	fmt.Printf("Minimum Time: %s ms\n", minTime)
-	fmt.Printf("Average Time: %s ms\n", avgTime)
-	fmt.Printf("Maximum Time: %s ms\n", maxTime)
-	fmt.Printf("Packet Loss: %s%%\n", packetLoss)
-}
+// func main() {
+// ip, mac, err := GetHostIPAndMAC()
+// if err != nil {
+// fmt.Println("Error getting IP and MAC:", err)
+// return
+// }
+// fmt.Println("IP Address:", ip)
+// fmt.Println("MAC Address:", mac)
+//
+// Change the URL to a valid address for pinging
+// url := "google.com" // Example URL
+// ipAddress, minTime, avgTime, maxTime, packetLoss, err := ExtractPingStats(url)
+// if err != nil {
+// fmt.Println("Error extracting ping stats:", err)
+// return
+// }
+//
+// fmt.Printf("Ping Statistics for %s:\n", url)
+// fmt.Printf("IP Address: %s\n", ipAddress)
+// fmt.Printf("Minimum Time: %s ms\n", minTime)
+// fmt.Printf("Average Time: %s ms\n", avgTime)
+// fmt.Printf("Maximum Time: %s ms\n", maxTime)
+// fmt.Printf("Packet Loss: %s%%\n", packetLoss)
+// }
+//
