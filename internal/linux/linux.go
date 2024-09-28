@@ -1,3 +1,4 @@
+// By @InfectedMunshroom
 package linux
 
 import (
