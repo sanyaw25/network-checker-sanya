@@ -1,46 +1,78 @@
 package linux
 
 import (
+	"fmt"
+	"net"
 	"os/exec"
+	"regexp"
 )
 
-type data struct {
-	mac               string
-	hostname          string
-	hostip            string
-	urlcust           string
-	urlgoogle         string
-	packetLossPercent int
-	timeTakenMin      float32
-	timeTakenAvg      float32
-	timeTakenMax      float32
+func GetHostIPAndMAC() (string, string, error) {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return "", "", err
+	}
+
+	for _, iface := range interfaces {
+		// Skip loopback interfaces
+		if iface.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+
+		addrs, err := iface.Addrs()
+		if err != nil {
+			return "", "", err
+		}
+
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+
+			if ip != nil && ip.IsLoopback() == false && ip.To4() != nil {
+				return ip.String(), iface.HardwareAddr.String(), nil
+			}
+		}
+	}
+
+	return "", "", fmt.Errorf("no valid IP address found")
 }
 
-// Function to execute the ping command and return the output
-func PingURL(url string) (string, error) {
+func ExtractPingStats(url string) (string, string, string, string, string, error) {
 	cmd := exec.Command("ping", "-c", "5", url)
 	output, err := cmd.Output()
+	pingOutput := string(output)
+
+	ipRe := regexp.MustCompile(`\((\d+\.\d+\.\d+\.\d+)\)`)
+	statsRe := regexp.MustCompile(`rtt min/avg/max/mdev = ([\d.]+)/([\d.]+)/([\d.]+)/[\d.]+ ms`)
+	packetLossRe := regexp.MustCompile(`(\d+)% packet loss`)
 	if err != nil {
-		return "", err
+		return "", "", "", "", "", fmt.Errorf("Error in running program", err)
 	}
-	return string(output), nil
+
+	ipMatch := ipRe.FindStringSubmatch(pingOutput)
+	if len(ipMatch) < 2 {
+		return "", "", "", "", "", fmt.Errorf("no IP address found")
+	}
+	ipAddress := ipMatch[1]
+
+	statsMatch := statsRe.FindStringSubmatch(pingOutput)
+	if len(statsMatch) < 4 {
+		return "", "", "", "", "", fmt.Errorf("no timing statistics found")
+	}
+	minTime := statsMatch[1]
+	avgTime := statsMatch[2]
+	maxTime := statsMatch[3]
+
+	packetLossMatch := packetLossRe.FindStringSubmatch(pingOutput)
+	if len(packetLossMatch) < 2 {
+		return "", "", "", "", "", fmt.Errorf("no packet loss information found")
+	}
+	packetLoss := packetLossMatch[1]
+
+	return ipAddress, minTime, avgTime, maxTime, packetLoss, nil
 }
-
-// func main() {
-// 	// Prompt the user for input
-// 	reader := bufio.NewReader(os.Stdin)
-// 	fmt.Print("Enter the website/URL to ping: ")
-// 	url, _ := reader.ReadString('\n')
-// 	url = url[:len(url)-1] // Remove the newline character
-
-// 	// Call the pingURL function
-// 	result, err := PingURL(url)
-// 	if err != nil {
-// 		fmt.Println("Error executing command:", err)
-// 		return
-// 	}
-
-// 	// Print the output
-// 	fmt.Println("Command Output:")
-// 	fmt.Println(result)
-// }
