@@ -43,7 +43,7 @@ func GetHostIPAndMAC() (string, string, error) {
 }
 
 func ExtractPingStats(url string) (string, string, string, string, string, error) {
-	cmd := exec.Command("ping", "-n", "5", url)
+	cmd := exec.Command("ping", "-4", "-n", "5", url)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", "", "", "", "", fmt.Errorf("error running ping command: %w", err)

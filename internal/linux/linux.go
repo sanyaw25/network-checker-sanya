@@ -44,7 +44,7 @@ func GetHostIPAndMAC() (string, string, error) {
 }
 
 func ExtractPingStats(url string) (string, string, string, string, string, error) {
-	cmd := exec.Command("ping", "-c", "5", url)
+	cmd := exec.Command("ping", "-4", "-c", "5", url)
 	output, err := cmd.Output()
 	pingOutput := string(output)
 
@@ -54,10 +54,9 @@ func ExtractPingStats(url string) (string, string, string, string, string, error
 	if err != nil {
 		return "", "", "", "", "", fmt.Errorf("Error in running program", err)
 	}
-
 	ipMatch := ipRe.FindStringSubmatch(pingOutput)
 	if len(ipMatch) < 2 {
-		return "", "", "", "", "", fmt.Errorf("no IP address found")
+		return "", "", "", "", "", fmt.Errorf("no IP Address found")
 	}
 	ipAddress := ipMatch[1]
 
