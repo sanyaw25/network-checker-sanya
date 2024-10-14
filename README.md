@@ -3,7 +3,7 @@ network-checker, mini project in Go
 
 Work Done By:
 @InfectedMunshroom
-@sanyw25
+@sanyaw25
 
 # Usage
 1. Execute main binary, ensure templates document is present in the same directory as the main binary 
